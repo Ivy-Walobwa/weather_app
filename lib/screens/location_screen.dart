@@ -1,13 +1,71 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:weatherapp/utils/constants.dart';
+import 'package:weatherapp/components/reusable_card.dart';
+import 'package:weatherapp/services/weather.dart';
 
 class LocationScreen extends StatefulWidget {
+  LocationScreen({this.locationWeather});
+  final locationWeather;
+
   @override
   _LocationScreenState createState() => _LocationScreenState();
 }
 
 class _LocationScreenState extends State<LocationScreen> {
+  String city;
+  List tempArray;
+  List humidityArray;
+  List iconsArray;
+  List timeArray;
+  String description;
+  String imageUrl;
+
+//  String weatherIconUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    updateUI(widget.locationWeather);
+  }
+
+  updateUI(dynamic weatherData) {
+    setState(() {
+      tempArray = getConditionArray(Weather().getTemperatures(weatherData));
+      humidityArray = getConditionArray(Weather().getHumidities(weatherData));
+      iconsArray = getConditionArray(Weather().getWeatherIcon(weatherData, 2));
+      timeArray = getConditionArray(Weather().getTime(weatherData));
+      description = Weather().getWeatherDescription(weatherData);
+      city = weatherData['city']['name'];
+      imageUrl = Weather().getWeatherIcon(weatherData, 4)[0];
+    });
+  }
+
+  getConditionArray(var function) {
+    List newArray = [];
+    var receivedArray = function;
+    for (int i = 0; i < 4; i++) {
+      newArray.add(receivedArray[i]);
+    }
+    return newArray;
+  }
+
+  List<Widget> addReusableCard() {
+    List<Widget> cardArray = [];
+    for (int i = 0; i < 4; i++) {
+      if(i==0){
+        timeArray[i] = 'now';
+      }
+      cardArray.add(ReusableCard(
+        temp: tempArray[i],
+        humidity: humidityArray[i],
+        iconUrl: iconsArray[i],
+        time: timeArray[i],
+      ));
+    }
+    return cardArray;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,14 +87,12 @@ class _LocationScreenState extends State<LocationScreen> {
                       size: 30.0,
                     ),
                     label: Text(
-                      'Ngong',
+                      city,
                       style: kLocationTextStyle,
                     ),
                   ),
                   FlatButton(
-                    onPressed: (){
-
-                    },
+                    onPressed: () {},
                     child: Icon(
                       Icons.search,
                       color: kGreyColor,
@@ -55,19 +111,16 @@ class _LocationScreenState extends State<LocationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-
                         Text(
-                          '21°C',
+                          '${tempArray[0]}°C',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 60.0,
                             fontWeight: FontWeight.w900,
-
                           ),
                         ),
-
                         Text(
-                          'Mostly Cloudy with Showers',
+                          '$description in $city',
                           style: TextStyle(
                             fontSize: 50.0,
                             color: kGreyColor,
@@ -78,23 +131,13 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                   ),
                 ),
-                Text('🌤',
-                  style: TextStyle(
-                      fontSize: 200.0
-                  ),),
-
+               Image.network(imageUrl),
               ],
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                ReusableCard(),
-                ReusableCard(),
-                ReusableCard(),
-                ReusableCard(),
-              ],
+              children: addReusableCard(),
             ),
-
           ],
         ),
       ),
@@ -102,51 +145,7 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 }
 
-class ReusableCard extends StatelessWidget {
-  const ReusableCard({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
-      padding: EdgeInsets.only(left: 30.0),
-      height: 50.0,
-      decoration: BoxDecoration(
-        color: kCardColour,
-        borderRadius: BorderRadius.circular(5.0),
-
-      ),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Now',
-              style: kTimeTextStyle,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              '🌤',
-              style: kIconTextStyle,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              '100%',
-              style: kPercentageTextStyle,
-            ),
-          ),
-          Expanded(
-            child: Text(
-                '21°C',
-              style: kTimeTextStyle,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//Text(
+//'🌤',
+//style: TextStyle(fontSize: 200.0),
+//)

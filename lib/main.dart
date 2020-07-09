@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/location_screen.dart';
-
+import 'screens/loading_screen.dart';
 void main() {
   runApp(MyApp());
 }
@@ -14,7 +13,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Color(0xFF0A0E13),
         scaffoldBackgroundColor: Color(0xFF0A0E13)
       ),
-      home: LocationScreen(),
+      home: LoadingScreen(),
     );
   }
 }
